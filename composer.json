@@ -4,8 +4,8 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.0",
-        "symfony/polyfill-php72": "^1.11",
-        "symfony/polyfill-php73": "^1.11",
+        "symfony/polyfill-php72": "^1.0",
+        "symfony/polyfill-php73": "^1.0",
         "brandonwamboldt/utilphp": "^1.1",
         "kint-php/kint": "^3.2"
     },
