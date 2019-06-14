@@ -11,6 +11,7 @@ use Symfony\Polyfill\Php73\Php73;
  */
 class Toolbox extends util
 {
+
     /**
      * @param int $size
      * @return string
@@ -72,7 +73,7 @@ class Toolbox extends util
      */
     public function is_sequential(array $array)
     {
-        return \array_keys($array) === \range(0, \count($array) - 1);
+        return array_keys($array) === range(0, count($array) - 1);
     }
 
     /**
@@ -82,7 +83,10 @@ class Toolbox extends util
      */
     public static function is_iterable($var)
     {
-        return \is_array($var) || $var instanceof \iterable;
+        return is_array($var)
+            || $var instanceof \Traversable
+            || $var instanceof \iterable
+        ;
     }
 
     /**
@@ -93,7 +97,11 @@ class Toolbox extends util
      * @return bool
      */
     public static function is_countable($var) {
-        return is_array($var) || $var instanceof Countable || $var instanceof ResourceBundle || $var instanceof SimpleXmlElement;
+        return is_array($var)
+            || $var instanceof \Countable
+            || (class_exists("ResourceBundle") && $var instanceof \ResourceBundle)
+            || (class_exists("ext-simplexml") && $var instanceof \SimpleXmlElement)
+        ;
     }
 
 

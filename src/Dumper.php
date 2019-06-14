@@ -24,23 +24,19 @@ class Dumper
         if (!Kint::$enabled_mode) {
             return 0;
         }
-
         $stashedMode = Kint::$enabled_mode;
-
         if (Kint::MODE_TEXT !== Kint::$enabled_mode) {
             Kint::$enabled_mode = Kint::MODE_PLAIN;
             if (PHP_SAPI === 'cli' && true === Kint::$cli_detection) {
                 Kint::$enabled_mode = Kint::$mode_default_cli;
             }
         }
-
         $args = \func_get_args();
         $out = \call_user_func_array(array('Kint', 'dump'), $args);
-
         Kint::$enabled_mode = $stashedMode;
-
         return $out;
     }
+
     /**
      * dump in rich text
      * @param mixed ...$vars
