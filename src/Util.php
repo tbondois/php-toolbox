@@ -98,10 +98,10 @@ class Util extends Base
      */
     public static function dump(...$vars)
     {
-        foreach ($vars as $var) {
-            if (function_exists("dump")) {
-                dump($var);
-            } else {
+        if (function_exists("dump")) {
+            dump(...$vars);
+        } else {
+            foreach ($vars as $var) {
                 Util::var_dump($var, false, 1);
             }
         }
