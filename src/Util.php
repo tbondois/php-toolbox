@@ -104,25 +104,6 @@ class Util extends Base
         ;
     }
 
-
-    /**
-     * ie : \TB\Toolbox::php72()::utf8_encode("xxx");
-     * @return Php72
-     */
-    public static function php72()
-    {
-        return new Php72();
-    }
-
-    /**
-     * @return Php73
-     */
-    public static function php73()
-    {
-        return new Php73();
-    }
-
-
     /**
      * @param mixed ...$vars
      * @return string
