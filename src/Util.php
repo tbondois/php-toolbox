@@ -34,21 +34,6 @@ class Util extends Base
         return round($size/pow(1024,($i=floor(log($size,1024)))),2).$unit[$i];
     }
 
-    /**
-     * @param int $limit
-     * @return array
-     */
-    public static function formatted_backtraces(int $limit = 1)
-    {
-        $backtraces = [];
-        for ($index = 1; $index <= $limit; $index++) {
-            $backtrace = static::formatted_backtrace($index);
-            if ($backtrace) {
-                $backtraces = $backtrace;
-            }
-        }
-        return $backtraces;
-    }
 
     /**
      * @param int $index
@@ -58,12 +43,17 @@ class Util extends Base
     {
         $dbt = debug_backtrace();
         if (isset($dbt[$index])) {
-            return sprintf("%s::%s():%s"
-                , $backtrace['class'] ?? $backtrace['file'] ?? '-'
-                , $backtrace['function'] ?? '-'
-                , $backtrace['line'] ?? '-'
-            );
+            $backtrace = $dbt[$index];
+        } else {
+            $backtrace = self::array_last($dbt);
         }
+        return sprintf("%s%s%s():%s"
+            , $backtrace['class'] ?? $backtrace['file'] ?? '-'
+            , $backtrace['type'] ?? '::'
+            , $backtrace['function'] ?? '-'
+            , $backtrace['line'] ?? '-'
+        );
+
         return null;
     }
 
@@ -111,7 +101,11 @@ class Util extends Base
     public static function dump(...$vars)
     {
         foreach ($vars as $var) {
-            Util::var_dump($var, false, 1);
+            if (function_exists("dump")) {
+                dump($var);
+            } else {
+                Util::var_dump($var, false, 1);
+            }
         }
     }
 
@@ -121,10 +115,8 @@ class Util extends Base
      */
     public static function die_dump(...$vars)
     {
-        foreach ($vars as $var) {
-            Util::var_dump($var, false, 1);
-        }
-        die(PHP_EOL."/".__FUNCTION__.PHP_EOL);
+        static::dump(...$vars);
+        die(PHP_EOL."/die in ".static::formatted_backtrace().PHP_EOL);
     }
 
 } // end class
