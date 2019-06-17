@@ -9,6 +9,7 @@
     },
     "minimum-stability": "stable",
     "suggest": {
+        "tbondois/php-debug": "PHP debug libraries (dumpers...) for common needs. should not be installed in production",
         "ext-json": "Needed to use Json class"
     },
     "autoload": {
