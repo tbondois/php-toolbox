@@ -1,21 +1,25 @@
 {
     "name": "tbondois/php-toolbox",
-    "description": "PHP libraries (functions, dumpers...) for common needs",
-    "minimum-stability": "stable",
+    "description": "PHP libraries for common needs",
     "require": {
         "php": ">=7.0",
         "symfony/polyfill-php72": "^1.0",
         "symfony/polyfill-php73": "^1.0",
-        "brandonwamboldt/utilphp": "^1.1",
-        "kint-php/kint": "^3.2"
+        "brandonwamboldt/utilphp": "^1.1"
     },
+    "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
-            "TB\\": "src/"
+            "TB\\Toolbox\\": "src/"
         }
     },
-    "license": "GPL-3.0-or-later",
-    "homepage": "https://packagist.org/packages/tbondois/",
+    "autoload-dev": {
+        "psr-4": {
+            "TB\\Toolbox\\Test\\": "tests/"
+        }
+    },
+    "license": "MIT",
+    "homepage": "https://packagist.org/packages/tbondois/php-toolbox",
     "authors": [
         {
             "name": "Thomas Bondois",
@@ -27,8 +31,7 @@
         "json",
         "util",
         "utils",
-        "dump",
-        "dumper",
-        "toobox"
+        "toolbox",
+        "php"
     ]
 }

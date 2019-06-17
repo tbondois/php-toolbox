@@ -1,11 +1,12 @@
 <?php
 
-namespace TB;
+namespace TB\Toolbox;
 
 use Exception;
 use JsonException;
 
 /**
+ * PHP library "ext-json" should be installed to use one of theses functions
  * @author Thomas Bondois
  */
 class Json

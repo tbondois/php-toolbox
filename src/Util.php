@@ -1,15 +1,15 @@
 <?php
 
-namespace TB;
+namespace TB\Toolbox;
 
-use utilphp\util;
+use utilphp\util as Base;
 use Symfony\Polyfill\Php72\Php72;
 use Symfony\Polyfill\Php73\Php73;
 
 /**
  * @author Thomas Bondois
  */
-class Toolbox extends util
+class Util extends Base
 {
 
     /**
@@ -120,6 +120,18 @@ class Toolbox extends util
     public static function php73()
     {
         return new Php73();
+    }
+
+
+    /**
+     * @param mixed ...$vars
+     * @return string
+     */
+    public static function dump(...$vars)
+    {
+        foreach ($vars as $var) {
+            Util::var_dump($var, false, 1);
+        }
     }
 
 

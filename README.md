@@ -25,11 +25,9 @@ Usage
 
 ```php
 include_once 'vendor/autoload.php';
-use TB\Toolbox;
-use TB\Dumper;
-use TB\Json;
+use TB\Toolbox\Util;
+use TB\Toolbox\Json;
 
-Dumper::auto("hello!");
 ```
 
 
