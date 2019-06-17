@@ -115,5 +115,16 @@ class Util extends Base
         }
     }
 
+    /**
+     * dump and stop script
+     * @param mixed ...$vars
+     */
+    public static function die_dump(...$vars)
+    {
+        foreach ($vars as $var) {
+            Util::var_dump($var, false, 1);
+        }
+        die(PHP_EOL.__FUNCTION__.PHP_EOL);
+    }
 
 } // end class
