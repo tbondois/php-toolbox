@@ -8,6 +8,9 @@
         "brandonwamboldt/utilphp": "^1.1"
     },
     "minimum-stability": "stable",
+    "suggest": {
+        "ext-json": "Needed to use Json class"
+    },
     "autoload": {
         "psr-4": {
             "TB\\Toolbox\\": "src/"
