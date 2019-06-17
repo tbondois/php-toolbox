@@ -9,7 +9,7 @@
     },
     "minimum-stability": "stable",
     "suggest": {
-        "ext-json": "Needed to use JSON class"
+        "ext-json": "Needed to use Json class"
     },
     "autoload": {
         "psr-4": {
