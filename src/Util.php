@@ -45,7 +45,7 @@ class Util extends Base
         if (isset($dbt[$index])) {
             $backtrace = $dbt[$index];
         } else {
-            $backtrace = self::array_last($dbt);
+            $backtrace = end($dbt);
         }
         return sprintf("%s:%s"
             , $backtrace['file']  ?? '-'
