@@ -100,7 +100,7 @@ class Util extends Base
         return is_array($var)
             || $var instanceof \Countable
             || (class_exists("ResourceBundle") && $var instanceof \ResourceBundle)
-            || (class_exists("ext-simplexml") && $var instanceof \SimpleXmlElement)
+            || (class_exists("SimpleXmlElement") && $var instanceof \SimpleXmlElement)
         ;
     }
 
