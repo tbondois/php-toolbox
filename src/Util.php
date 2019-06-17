@@ -124,7 +124,7 @@ class Util extends Base
         foreach ($vars as $var) {
             Util::var_dump($var, false, 1);
         }
-        die(PHP_EOL.__FUNCTION__.PHP_EOL);
+        die(PHP_EOL."/".__FUNCTION__.PHP_EOL);
     }
 
 } // end class
