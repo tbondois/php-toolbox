@@ -47,10 +47,8 @@ class Util extends Base
         } else {
             $backtrace = self::array_last($dbt);
         }
-        return sprintf("%s%s%s():%s"
-            , $backtrace['class'] ?? $backtrace['file'] ?? '-'
-            , $backtrace['type'] ?? '::'
-            , $backtrace['function'] ?? '-'
+        return sprintf("%s:%s"
+            , $backtrace['file']  ?? '-'
             , $backtrace['line'] ?? '-'
         );
 
