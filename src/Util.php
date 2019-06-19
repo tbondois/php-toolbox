@@ -3,13 +3,17 @@
 namespace TB\Toolbox;
 
 use utilphp\util as BaseUtil;
+use Exception;
 
 /**
  * @author Thomas Bondois
  */
 class Util extends BaseUtil
 {
-    const DATE_FORMAT_DEFAULT = "Y-m-d h:i:s";
+    const DATETIME_FORMAT_DEFAULT = "Y-m-d H:i:s";
+    const DATETIME_FORMAT_DEFAULT_T = "Y-m-d\TH:i:s";
+    const DATETIME_FORMAT_MICRO   = "Y-m-d H:i:s.u";
+    const DATETIME_FORMAT_MICRO_T   = "Y-m-d\TH:i:s.u";
 
     /**
      * @param array $array
@@ -238,33 +242,44 @@ class Util extends BaseUtil
     /**
      * @param int|string|null $time
      * @param string|null $format
+     *
      * @return false|string
+     * @throws Exception
      */
-    public static function date_format($time = null, $format = null)
+    public static function date_format_utc($time = null, string $format = null)
     {
-        if (null === $format) {
-            $format = self::DATE_FORMAT_DEFAULT;
-        }
-        if (!is_numeric($time)) {
-            $time = strtotime($time);
-        }
-        return date($format, $time);
+        return static::date_format($time, $format, "UTC");
+        
     }
-
+    
     /**
-     * @param int|string|null $time
+     * @see https://www.php.net/manual/fr/datetime.construct.php
+     * @see https://www.php.net/manual/en/datetime.formats.php
+     * @see https://www.php.net/manual/en/timezones.php
+     * @param int|string|null $time ie : "-1 day", "yesterday", "now", "1940-06-22" etc
      * @param string|null $format
+     * @param string|null $timezone ie: "Europe/Paris", "UTC"... null use php.ini default
      * @return false|string
+     * @throws Exception
      */
-    public static function gmdate_format($time = null, $format = null)
+    public static function date_format($time = null, string $format = null, string $timezone = null)
     {
         if (null === $format) {
-            $format = self::DATE_FORMAT_DEFAULT;
+            $format = self::DATETIME_FORMAT_DEFAULT;
         }
-        if (null !== $time && !is_numeric($time)) {
-            $time = strtotime($time);
+        if (null == $format) {
+            $time = 'now';
+        } elseif (is_numeric($time)) {
+            $time = "@".$time;
         }
-        return gmdate($format, $time);
+
+        $oTimezone = null;
+        if ($timezone) {
+            $oTimezone = new \DateTimeZone($timezone);
+        }
+        $oDateTime = new \DateTime($time, $oTimezone);
+
+        return $oDateTime->format($format);
     }
 
     /**

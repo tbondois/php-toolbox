@@ -3,8 +3,8 @@
     "description": "PHP libraries for common needs",
     "require": {
         "php": ">=7.0",
-        "symfony/polyfill-ctype": "*",
-        "brandonwamboldt/utilphp": "^1.1"
+        "brandonwamboldt/utilphp": "^1.1",
+        "symfony/polyfill-ctype": "*"
     },
     "require-dev": {
         "tbondois/php-debug": "*"
@@ -17,7 +17,10 @@
     "autoload": {
         "psr-4": {
             "TB\\Toolbox\\": "src/"
-        }
+        },
+        "files": [
+            "init/aliases.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

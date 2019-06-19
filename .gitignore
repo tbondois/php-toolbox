@@ -3,6 +3,6 @@
 !.editorconfig
 /vendor/
 composer.phar
-composer.lock
-phpunit.xml
+/composer.lock
+/phpunit.xml
 /*.php

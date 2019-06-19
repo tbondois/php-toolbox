@@ -25,10 +25,8 @@ Usage
 
 ```php
 include_once 'vendor/autoload.php';
-use TB\Toolbox\Util;
-use TB\Toolbox\Json;
-use TB\Toolbox\File;
 
+echo \util::date_format();
 ```
 
 
