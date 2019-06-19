@@ -2,17 +2,14 @@
 
 namespace TB\Toolbox;
 
-use utilphp\util as BaseUtil;
-use Exception;
-
 /**
  * @author Thomas Bondois
  */
-class Util extends BaseUtil
+class Util extends \utilphp\util
 {
-    const DATETIME_FORMAT_DEFAULT = "Y-m-d H:i:s";
+    const DATETIME_FORMAT_DEFAULT   = "Y-m-d H:i:s";
     const DATETIME_FORMAT_DEFAULT_T = "Y-m-d\TH:i:s";
-    const DATETIME_FORMAT_MICRO   = "Y-m-d H:i:s.u";
+    const DATETIME_FORMAT_MICRO     = "Y-m-d H:i:s.u";
     const DATETIME_FORMAT_MICRO_T   = "Y-m-d\TH:i:s.u";
 
     /**
@@ -238,19 +235,6 @@ class Util extends BaseUtil
         $size = (int)$size;
         return round($size/pow(1024,($i=floor(log($size,1024)))),2).$unit[$i];
     }
-
-    /**
-     * @param int|string|null $time
-     * @param string|null $format
-     *
-     * @return false|string
-     * @throws Exception
-     */
-    public static function date_format_utc($time = null, string $format = null)
-    {
-        return static::date_format($time, $format, "UTC");
-        
-    }
     
     /**
      * @see https://www.php.net/manual/fr/datetime.construct.php
@@ -260,7 +244,7 @@ class Util extends BaseUtil
      * @param string|null $format
      * @param string|null $timezone ie: "Europe/Paris", "UTC"... null use php.ini default
      * @return false|string
-     * @throws Exception
+     * @throws \Exception
      */
     public static function date_format($time = null, string $format = null, string $timezone = null)
     {
@@ -280,6 +264,18 @@ class Util extends BaseUtil
         $oDateTime = new \DateTime($time, $oTimezone);
 
         return $oDateTime->format($format);
+    }
+
+    /**
+     * @param int|string|null $time
+     * @param string|null $format
+     *
+     * @return false|string
+     * @throws \Exception
+     */
+    public static function date_format_utc($time = null, string $format = null)
+    {
+        return static::date_format($time, $format, "UTC");
     }
 
     /**
@@ -314,7 +310,7 @@ class Util extends BaseUtil
             dump(...$vars);
         } else {
             foreach ($vars as $var) {
-                BaseUtil::var_dump($var, false, 1);
+                parent::var_dump($var, false, 1);
             }
         }
     }
@@ -326,7 +322,7 @@ class Util extends BaseUtil
     public static function dump_plain(...$vars)
     {
         foreach ($vars as $var) {
-            BaseUtil::var_dump_plain($var, false, 1);
+            parent::var_dump_plain($var, false, 1);
         }
     }
 
