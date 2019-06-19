@@ -20,7 +20,7 @@ class Json
      * @param int  $options
      *
      * @return mixed
-     * @throws \JsonException|Exception
+     * @throws JsonException|Exception
      *
      */
     public static function decode($value, $assoc = false, int $depth = 512, int $options = 0)
@@ -36,8 +36,6 @@ class Json
             throw new Exception($jsonErrorMessage, $jsonErrorCode);
         }
         return $decoded;
-
-
     }
 
     /**

@@ -4,7 +4,7 @@ PHP Toolbox
 Presentation
 ---------------
 
-This project is based on [brandonwamboldt/utilphp][1] and [Symfony Polyfill][2] PHP libraries. I added some features. 
+This project is based on [brandonwamboldt/utilphp][1] and PHP library. I extended it with some functions 
 
 Installation in a project
 ---------------
@@ -36,4 +36,3 @@ References
 ---------------
 
 [1]: http://brandonwamboldt.github.io/utilphp/
-[2]: https://symfony.com/components/Polyfill%20PHP%207.2

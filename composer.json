@@ -3,9 +3,11 @@
     "description": "PHP libraries for common needs",
     "require": {
         "php": ">=7.0",
-        "symfony/polyfill-php72": "*",
-        "symfony/polyfill-php73": "*",
+        "symfony/polyfill-ctype": "*",
         "brandonwamboldt/utilphp": "^1.1"
+    },
+    "require-dev": {
+        "tbondois/php-debug": "*"
     },
     "minimum-stability": "stable",
     "suggest": {
