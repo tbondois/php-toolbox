@@ -45,30 +45,4 @@ class File
         return ob_get_clean();
     }
 
-    /**
-     * Usage example:
-     * $data = [ ... ];
-     * File::download_send_headers("data_export_" . date("Y-m-d") . ".csv");
-     * echo File::array_to_csv($data);
-     *
-     * @param string $file
-     */
-    public static function download_send_headers(string $file)
-    {
-        // disable caching
-        $now = gmdate("D, d M Y H:i:s");
-        header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
-        header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
-        header("Last-Modified: {$now} GMT");
-
-        // force download
-        header("Content-Type: application/force-download");
-        header("Content-Type: application/octet-stream");
-        header("Content-Type: application/download");
-
-        // disposition / encoding on response body
-        header("Content-Disposition: attachment;filename={$file}");
-        header("Content-Transfer-Encoding: binary");
-    }
-
 }
