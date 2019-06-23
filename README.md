@@ -26,7 +26,8 @@ Usage
 ```php
 include_once 'vendor/autoload.php';
 
-echo \util::date_format();
+echo \TB\Toolbox\Util::date_format();
+echo \toolbox_util::date_format(); // alias
 ```
 
 

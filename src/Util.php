@@ -23,6 +23,7 @@ class Util extends \utilphp\util
 
     /**
      * Polyfill for native function introduced in PHP 7.1
+     * @see \is_iterable()
      * @param $var
      * @return bool
      */
@@ -36,6 +37,7 @@ class Util extends \utilphp\util
 
     /**
      * Polyfill for native function introduced in PHP 7.3
+     * @see \is_countable()
      * @see https://www.php.net/manual/en/function.is-countable.php
      * @see https://wiki.php.net/rfc/is-countable
      * @param mixed $var
@@ -44,9 +46,35 @@ class Util extends \utilphp\util
     public static function is_countable($var) {
         return is_array($var)
             || $var instanceof \Countable
-            || (class_exists("ResourceBundle") && $var instanceof \ResourceBundle)
-            || (class_exists("SimpleXmlElement") && $var instanceof \SimpleXmlElement)
+            || $var instanceof \ResourceBundle
+            || $var instanceof \SimpleXmlElement
         ;
+    }
+
+
+    /**
+     * Polyfill for PHP 7.3
+     * @see \array_key_first()
+     * @param array $array
+     *
+     * @return int|string
+     */
+    public static function array_key_first(array $array)
+    {
+        return static::array_first_key($array);
+    }
+
+
+    /**
+     * Polyfill for PHP 7.3
+     * @see \array_key_last()
+     * @param array $array
+     *
+     * @return int|string
+     */
+    public static function array_key_last(array $array)
+    {
+        return static::array_last_key($array);
     }
 
     /**
@@ -56,7 +84,10 @@ class Util extends \utilphp\util
      */
     public function bool($val) : bool
     {
-        switch (strtolower(trim($val))) {
+        if (static::is_countable($val)) {
+            return (bool)count($val);
+        }
+        switch (strtolower(trim((string)$val))) {
             case "":
             case "-":
             case "false":
@@ -69,11 +100,6 @@ class Util extends \utilphp\util
             case "empty":
             case "0":
             case "-1":
-                return false;
-        }
-        switch ($val) {
-            case []:
-            case -1:
                 return false;
         }
         return (bool)$val;
@@ -107,11 +133,11 @@ class Util extends \utilphp\util
                     "",
                 ], (string)$val
             );
-            if (static::is_negative($val)) {
-                $stripped = "-".$stripped;
-            }
             if (!$stripped) {
                 $stripped = 0;
+            }
+            if (static::is_negative($val)) {
+                $stripped = "-".$stripped;
             }
             $val = $stripped;
         }
@@ -124,7 +150,7 @@ class Util extends \utilphp\util
      */
     public static function is_negative($val) : bool
     {
-        return static::starts_with($val, "-");
+        return static::starts_with((string)$val, "-");
     }
 
     /**
@@ -310,7 +336,7 @@ class Util extends \utilphp\util
             dump(...$vars);
         } else {
             foreach ($vars as $var) {
-                parent::var_dump($var, false, 1);
+                parent::var_dump($var);
             }
         }
     }
