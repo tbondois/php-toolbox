@@ -12,6 +12,8 @@ class Util extends \utilphp\util
     const DATETIME_FORMAT_MICRO     = "Y-m-d H:i:s.u";
     const DATETIME_FORMAT_MICRO_T   = "Y-m-d\TH:i:s.u";
 
+    const TRIM_BASE_CHARLIST = " \t\n\r\0\x0B";
+
     /**
      * @param array $array
      * @return bool
@@ -78,12 +80,26 @@ class Util extends \utilphp\util
     }
 
     /**
+     * @param        $str
+     * @param string $extraCharlist
+     * @return string
+     */
+    public function trim($str, string $extraCharlist = "")
+    {
+        $charlist = static::TRIM_BASE_CHARLIST.$extraCharlist;
+        return trim($str, $charlist);
+    }
+
+    /**
      * Better boolean conversion based on special common keywords
      * @param mixed $val
      * @return bool
      */
     public function bool($val) : bool
     {
+        if (empty($val)) {
+            return false;
+        }
         if (static::is_countable($val)) {
             return (bool)count($val);
         }
@@ -100,6 +116,8 @@ class Util extends \utilphp\util
             case "empty":
             case "0":
             case "-1":
+            case "[]":
+            case "{}":
                 return false;
         }
         return (bool)$val;
