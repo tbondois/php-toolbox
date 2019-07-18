@@ -53,6 +53,16 @@ class Util extends \utilphp\util
         ;
     }
 
+    public function is_as_array($var) : bool
+    {
+        return static::is_iterable($var) && static::is_countable($var);
+    }
+
+    public function is_as_array_object($var) : bool
+    {
+        return static::is_as_array($var) && is_object($var);
+    }
+
 
     /**
      * Polyfill for PHP 7.3
@@ -84,7 +94,7 @@ class Util extends \utilphp\util
      * @param string $extraCharlist
      * @return string
      */
-    public function trim($str, string $extraCharlist = "")
+    public static function trim($str, string $extraCharlist = "")
     {
         $charlist = static::TRIM_BASE_CHARLIST.$extraCharlist;
         return trim($str, $charlist);
@@ -95,7 +105,7 @@ class Util extends \utilphp\util
      * @param mixed $val
      * @return bool
      */
-    public function bool($val) : bool
+    public static function bool($val) : bool
     {
         if (empty($val)) {
             return false;
@@ -103,8 +113,14 @@ class Util extends \utilphp\util
         if (static::is_countable($val)) {
             return (bool)count($val);
         }
-        switch (strtolower(trim((string)$val))) {
+
+        $sVal = (string)$val;
+        $sVal = str_replace([" ", "\t", "\r", "\n", "\0", "\x0B"], "", $sVal);
+        $sVal = strtolower($sVal);
+        switch ($sVal) {
             case "":
+            case "''":
+            case '""':
             case "-":
             case "false":
             case "null":
