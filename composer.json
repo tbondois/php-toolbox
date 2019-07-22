@@ -3,8 +3,9 @@
     "description": "PHP libraries for common needs",
     "require": {
         "php": ">=7.0",
-        "brandonwamboldt/utilphp": "^1.1",
-        "symfony/polyfill-ctype": "*"
+        "ext-json": "*",
+        "symfony/polyfill-ctype": "^1.11",
+        "brandonwamboldt/utilphp": "^1.1"
     },
     "require-dev": {
         "tbondois/php-debug": "*"
@@ -24,7 +25,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "TB\\Toolbox\\Test\\": "tests/"
+            "TB\\Toolbox\\Tests\\": "tests/"
         }
     },
     "license": "MIT",
@@ -32,7 +33,7 @@
     "authors": [
         {
             "name": "Thomas Bondois",
-            "homepage": "http://thomas.bondois.info"
+            "homepage": "https://thomas.bondois.info"
         }
     ],
     "keywords": [

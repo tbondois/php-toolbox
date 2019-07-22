@@ -14,91 +14,18 @@ class Util extends \utilphp\util
 
     const TRIM_BASE_CHARLIST = " \t\n\r\0\x0B";
 
-    /**
-     * @param array $array
-     * @return bool
-     */
-    public function is_sequential(array $array) : bool
-    {
-        return array_keys($array) === range(0, count($array) - 1);
-    }
-
-    /**
-     * Polyfill for native function introduced in PHP 7.1
-     * @see \is_iterable()
-     * @param $var
-     * @return bool
-     */
-    public static function is_iterable($var) : bool
-    {
-        return is_array($var)
-            || $var instanceof \Traversable
-            || $var instanceof \iterable
-        ;
-    }
-
-    /**
-     * Polyfill for native function introduced in PHP 7.3
-     * @see \is_countable()
-     * @see https://www.php.net/manual/en/function.is-countable.php
-     * @see https://wiki.php.net/rfc/is-countable
-     * @param mixed $var
-     * @return bool
-     */
-    public static function is_countable($var) {
-        return is_array($var)
-            || $var instanceof \Countable
-            || $var instanceof \ResourceBundle
-            || $var instanceof \SimpleXmlElement
-        ;
-    }
-
-    public function is_as_array($var) : bool
-    {
-        return static::is_iterable($var) && static::is_countable($var);
-    }
-
-    public function is_as_array_object($var) : bool
-    {
-        return static::is_as_array($var) && is_object($var);
-    }
-
-
-    /**
-     * Polyfill for PHP 7.3
-     * @see \array_key_first()
-     * @param array $array
-     *
-     * @return int|string
-     */
-    public static function array_key_first(array $array)
-    {
-        return static::array_first_key($array);
-    }
-
-
-    /**
-     * Polyfill for PHP 7.3
-     * @see \array_key_last()
-     * @param array $array
-     *
-     * @return int|string
-     */
-    public static function array_key_last(array $array)
-    {
-        return static::array_last_key($array);
-    }
-
-    /**
-     * @param        $str
-     * @param string $extraCharlist
-     * @return string
-     */
-    public static function trim($str, string $extraCharlist = "")
-    {
-        $charlist = static::TRIM_BASE_CHARLIST.$extraCharlist;
-        return trim($str, $charlist);
-    }
+    const BOOL_CAST_IGNORED_CHARS = [" ", "\t", "\r", "\n", "\0", "\x0B"];
+    const BOOL_CAST_CONSIDERED_AS_FALSE = [
+        "",
+        "false"     , "null",
+        "0"         , "-1",
+        "''"        , '""',
+        "no"        , "none",
+        "disabled"  , "void",
+        "undefined" , "empty",
+        "[]"        , "{}",
+        "__return_false",
+    ];
 
     /**
      * Better boolean conversion based on special common keywords
@@ -113,28 +40,15 @@ class Util extends \utilphp\util
         if (static::is_countable($val)) {
             return (bool)count($val);
         }
+        if (static::is_number($val)) {
+            return static::float($val) > 0;
+        }
 
         $sVal = (string)$val;
-        $sVal = str_replace([" ", "\t", "\r", "\n", "\0", "\x0B"], "", $sVal);
+        $sVal = str_replace(static::BOOL_CAST_IGNORED_CHARS, "", $sVal);
         $sVal = strtolower($sVal);
-        switch ($sVal) {
-            case "":
-            case "''":
-            case '""':
-            case "-":
-            case "false":
-            case "null":
-            case "no":
-            case "none":
-            case "disabled":
-            case "undefined":
-            case "void":
-            case "empty":
-            case "0":
-            case "-1":
-            case "[]":
-            case "{}":
-                return false;
+        if (in_array($sVal, static::BOOL_CAST_CONSIDERED_AS_FALSE)) {
+            return false;
         }
         return (bool)$val;
     }
@@ -160,12 +74,12 @@ class Util extends \utilphp\util
         if (!is_numeric($val)) { // is_numeric accept . but no , as numeric value
 
             $stripped = preg_replace([
-                    "/\,/",
-                    "/[^0-9\.]/",
-                ], [
-                    ".",
-                    "",
-                ], (string)$val
+                "/\,/",
+                "/[^0-9\.]/",
+            ], [
+                ".",
+                "",
+            ], (string)$val
             );
             if (!$stripped) {
                 $stripped = 0;
@@ -204,6 +118,145 @@ class Util extends \utilphp\util
             return false;
         }
     }
+
+    /**
+     * @param array $array
+     * @return bool
+     */
+    public function is_sequential(array $array) : bool
+    {
+        return array_keys($array) === range(0, count($array) - 1);
+    }
+
+    /**
+     * Polyfill for native function introduced in PHP 7.1
+     * @see \is_iterable()
+     * @param $var
+     * @return bool
+     */
+    public static function is_iterable($var) : bool
+    {
+        if (function_exists('is_iterable')) {
+            return is_iterable($var);
+        }
+        return is_array($var)
+            || $var instanceof \Traversable
+            || $var instanceof \iterable
+        ;
+    }
+
+    /**
+     * Polyfill for native function introduced in PHP 7.3
+     * @see \is_countable()
+     * @see https://www.php.net/manual/en/function.is-countable.php
+     * @see https://wiki.php.net/rfc/is-countable
+     * @param mixed $var
+     * @return bool
+     */
+    public static function is_countable($var)
+    {
+        if (function_exists('is_countable')) {
+            return is_countable($var);
+        }
+        return is_array($var)
+            || $var instanceof \Countable
+            || $var instanceof \ResourceBundle
+            || $var instanceof \SimpleXmlElement
+        ;
+    }
+
+    public function is_as_array($var) : bool
+    {
+        return static::is_iterable($var) && static::is_countable($var);
+    }
+
+    public function is_as_array_object($var) : bool
+    {
+        return static::is_as_array($var) && is_object($var);
+    }
+
+    /**
+     * Polyfill for PHP 7.3
+     * @see \array_key_first()
+     * @param array $array
+     *
+     * @return int|string
+     */
+    public static function array_key_first(array $array)
+    {
+        if (function_exists('array_key_first')) {
+            return array_key_first($array);
+        }
+        return static::array_first_key($array);
+    }
+
+
+    /**
+     * Polyfill for PHP 7.3
+     * @see \array_key_last()
+     * @param array $array
+     *
+     * @return int|string
+     */
+    public static function array_key_last(array $array)
+    {
+        if (function_exists('array_key_last')) {
+            return array_key_last($array);
+        }
+        return static::array_last_key($array);
+    }
+
+
+    public static function first_key(\iterable $iterable)
+    {
+        foreach ($iterable as $key => $value) {
+            return $key;
+        }
+        return null;
+    }
+
+    public static function iterable_first_value(\iterable $items)
+    {
+        foreach ($items as $key => $value) {
+            return $value;
+        }
+        return null;
+    }
+
+    public static function iterable_last_key(\iterable $items)
+    {
+        $lastKey = null;
+        foreach ($items as $key => $value) {
+            $lastKey = $key;
+        }
+        return $lastKey;
+    }
+
+
+    public static function iterable_last_value(\iterable $items)
+    {
+        $lastValue = null;
+        foreach ($items as $key => $value) {
+            $lastValue = $value;
+        }
+        return $lastValue;
+    }
+
+
+    /**
+     * @param        $str
+     * @param string $extraCharlist
+     * @return string
+     */
+    public static function trim($str, string $extraCharlist = "")
+    {
+        $charlist = static::TRIM_BASE_CHARLIST.$extraCharlist;
+        return trim($str, $charlist);
+    }
+
+
+
+
 
 
     /**
