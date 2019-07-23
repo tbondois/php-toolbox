@@ -184,9 +184,6 @@ class Util extends \utilphp\util
      */
     public static function array_key_first(array $array)
     {
-        if (function_exists('array_key_first')) {
-            return array_key_first($array);
-        }
         return static::array_first_key($array);
     }
 
@@ -195,19 +192,25 @@ class Util extends \utilphp\util
      * Polyfill for PHP 7.3
      * @see \array_key_last()
      * @param array $array
-     *
      * @return int|string
      */
     public static function array_key_last(array $array)
     {
-        if (function_exists('array_key_last')) {
-            return array_key_last($array);
-        }
         return static::array_last_key($array);
     }
 
+    public static function array_key_random(array $array)
+    {
+        return array_rand($array, 1);
+    }
 
-    public static function first_key(\iterable $iterable)
+    public static function array_value_random(array $array)
+    {
+        $key = array_rand($array, 1);
+        return $array[$key];
+    }
+
+    public static function iterable_key_first(\iterable $iterable)
     {
         foreach ($iterable as $key => $value) {
             return $key;
@@ -215,7 +218,7 @@ class Util extends \utilphp\util
         return null;
     }
 
-    public static function iterable_first_value(\iterable $items)
+    public static function iterable_value_first(\iterable $items)
     {
         foreach ($items as $key => $value) {
             return $value;
@@ -223,7 +226,7 @@ class Util extends \utilphp\util
         return null;
     }
 
-    public static function iterable_last_key(\iterable $items)
+    public static function iterable_key_last(\iterable $items)
     {
         $lastKey = null;
         foreach ($items as $key => $value) {
@@ -233,7 +236,7 @@ class Util extends \utilphp\util
     }
 
 
-    public static function iterable_last_value(\iterable $items)
+    public static function iterable_value_last(\iterable $items)
     {
         $lastValue = null;
         foreach ($items as $key => $value) {
