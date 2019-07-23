@@ -136,9 +136,6 @@ class Util extends \utilphp\util
      */
     public static function is_iterable($var) : bool
     {
-        if (function_exists('is_iterable')) {
-            return is_iterable($var);
-        }
         return is_array($var)
             || $var instanceof \Traversable
             || $var instanceof \iterable
@@ -155,9 +152,6 @@ class Util extends \utilphp\util
      */
     public static function is_countable($var)
     {
-        if (function_exists('is_countable')) {
-            return is_countable($var);
-        }
         return is_array($var)
             || $var instanceof \Countable
             || $var instanceof \ResourceBundle
@@ -256,11 +250,6 @@ class Util extends \utilphp\util
         $charlist = static::TRIM_BASE_CHARLIST.$extraCharlist;
         return trim($str, $charlist);
     }
-
-
-
-
-
 
     /**
      * Check if parameter is contain a whole number greather >= 0
@@ -413,7 +402,6 @@ class Util extends \utilphp\util
 
         return null;
     }
-
 
 
     /**
