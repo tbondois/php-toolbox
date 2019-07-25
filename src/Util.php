@@ -181,7 +181,6 @@ class Util extends \utilphp\util
         return static::array_first_key($array);
     }
 
-
     /**
      * Polyfill for PHP 7.3
      * @see \array_key_last()
@@ -212,7 +211,7 @@ class Util extends \utilphp\util
         return null;
     }
 
-    public static function iterable_value_first(\iterable $items)
+    public static function iterable_first(\iterable $items)
     {
         foreach ($items as $key => $value) {
             return $value;
@@ -230,7 +229,7 @@ class Util extends \utilphp\util
     }
 
 
-    public static function iterable_value_last(\iterable $items)
+    public static function iterable_last(\iterable $items)
     {
         $lastValue = null;
         foreach ($items as $key => $value) {
@@ -238,7 +237,6 @@ class Util extends \utilphp\util
         }
         return $lastValue;
     }
-
 
     /**
      * @param        $str

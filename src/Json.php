@@ -11,7 +11,6 @@ use JsonException;
  */
 class Json
 {
-
     /**
      * @see https://www.php.net/manual/en/function.json-decode.php
      * @param      $value
@@ -36,6 +35,33 @@ class Json
             throw new Exception($jsonErrorMessage, $jsonErrorCode);
         }
         return $decoded;
+    }
+
+
+    /**
+     * @param     $value
+     * @param int $depth
+     * @param int $options
+     *
+     * @return mixed
+     * @throws JsonException
+     */
+    public static function decodeAsObject($value, int $depth = 512, int $options = 0)
+    {
+        return static::decode($value, false, $depth, $options);
+    }
+
+    /**
+     * @param     $value
+     * @param int $depth
+     * @param int $options
+     *
+     * @return mixed
+     * @throws JsonException
+     */
+    public static function decodeAsArray($value, int $depth = 512, int $options = 0)
+    {
+        return static::decode($value, true, $depth, $options);
     }
 
     /**

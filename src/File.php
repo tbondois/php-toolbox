@@ -7,7 +7,6 @@ namespace TB\Toolbox;
  */
 class File
 {
-
     /**
      * @param string $file
      * @param string $delimiter

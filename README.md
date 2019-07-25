@@ -27,12 +27,23 @@ Usage
 include_once 'vendor/autoload.php';
 
 echo \TB\Toolbox\Util::date_format();
-echo \toolbox_util::date_format(); // alias
+echo \ToolboxUtil::date_format(); // alias
 ```
 
+
+Project Links
+---------------
+* [On GitHub][2]
+* [On Packagist][4]
+
+Author
+---------------
+* [Thomas Bondois][4]
 
 
 References
 ---------------
-
 [1]: http://brandonwamboldt.github.io/utilphp/
+[2]: https://github.com/tbondois/php-toolbox
+[3]: https://packagist.org/packages/tbondois/php-toolbox
+[4]: https://thomas.bondois.info
