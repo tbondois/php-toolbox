@@ -40,7 +40,7 @@ class Util extends \utilphp\util
         if (static::is_countable($val)) {
             return (bool)count($val);
         }
-        if (static::is_number($val)) {
+        if (is_numeric($val)) {
             return static::float($val) > 0;
         }
 
@@ -131,11 +131,24 @@ class Util extends \utilphp\util
 
     /**
      * Check if parameter is contain a whole number (no decimal or alphabet, except a minus at first position for negative ones)
-     * @param $val
+     *
+     * @param $var
+     *
      * @return bool
      */
-    public static function is_number($val) {
-        return !is_nan($val);
+    public static function is_whole_number($var) {
+        if (is_int($var)) {
+            return true;
+        } elseif (is_float($var)) {
+            return (int)$var == (float)$var;
+        } elseif (is_string($var) && is_numeric($var)) {
+            if (static::is_negative($var)) {
+                $var = substr($var, 1);
+            }
+            return ctype_digit($var);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -275,7 +288,7 @@ class Util extends \utilphp\util
      */
     public static function is_natural_number_include_zero($val) : bool
     {
-        if (static::is_number($val) && !static::is_negative($val)) {
+        if (static::is_whole_number($val) && !static::is_negative($val)) {
             return true;
         }
         return false;
@@ -304,7 +317,7 @@ class Util extends \utilphp\util
     public static function format_decimal($val, int $precision = 2, string $decimalSymbol = ".")
     {
         $strVal = (string)round(static::float($val), $precision);
-        if (static::is_number($strVal)) {
+        if (static::is_whole_number($strVal)) {
             return $strVal.$decimalSymbol."00";
         }
         $strVal = str_replace(".", $decimalSymbol, $strVal);

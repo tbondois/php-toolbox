@@ -4,6 +4,7 @@
     "require": {
         "php": ">=7.0",
         "ext-json": "*",
+        "symfony/polyfill-ctype": "^1.11",
         "brandonwamboldt/utilphp": "^1.1"
     },
     "require-dev": {
