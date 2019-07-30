@@ -92,6 +92,34 @@ class Util extends \utilphp\util
         return (float)$val;
     }
 
+    public static function get_extended_type($var) : string
+    {
+        $meta = gettype($var);
+        if (is_object($var)) {
+            $meta.=":".get_class($var);
+        }
+        $size = static::get_size($var);
+        if (is_numeric($size)) {
+            $meta.="($size)";
+        }
+        return $meta;
+    }
+
+    /**
+     * Get string length or elements count
+     * @param mixed $var
+     * @return int|null
+     */
+    public static function get_size($var)
+    {
+        if (is_string($var)) {
+            return strlen($var);
+        } elseif (static::is_countable($var)) {
+            return count($var);
+        }
+        return null;
+    }
+
     /**
      * @param mixed $val
      * @return bool
@@ -107,16 +135,7 @@ class Util extends \utilphp\util
      * @return bool
      */
     public static function is_number($val) {
-        if (is_int($val)) {
-            return true;
-        } elseif (is_string($val)) {
-            if (static::is_negative($val)) {
-                $val = substr($val, 1);
-            }
-            return ctype_digit($val);
-        } else {
-            return false;
-        }
+        return !is_nan($val);
     }
 
     /**
