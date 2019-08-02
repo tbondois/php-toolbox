@@ -269,6 +269,18 @@ class Util extends \utilphp\util
         return $lastValue;
     }
 
+    public static function array_column_recursive(array $array, ... $indexes)
+    {
+        foreach ($indexes as $index) {
+            try {
+                $array = array_column($array, $index);
+            } catch (\Exception $exception) {
+                break;
+            }
+        }
+        return $array;
+    }
+
     /**
      * @param        $str
      * @param string $extraCharlist
