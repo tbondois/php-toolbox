@@ -92,7 +92,7 @@ class Util extends \utilphp\util
         return (float)$val;
     }
 
-    public static function get_extended_type($var) : string
+    public static function get_type_meta($var) : string
     {
         $meta = gettype($var);
         if (is_object($var)) {
@@ -170,7 +170,6 @@ class Util extends \utilphp\util
     {
         return is_array($var)
             || $var instanceof \Traversable
-            || $var instanceof \iterable
         ;
     }
 
