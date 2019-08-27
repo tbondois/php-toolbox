@@ -425,6 +425,27 @@ class Util extends \utilphp\util
     }
 
     /**
+     * @param        $string
+     * @param int    $maxlength
+     * @param string $ending
+     * @param string $cutChar only 1 char here. can be \n to cut at first line.
+     *
+     * @return string
+     */
+    public function cutAtWord($string, $maxlength = 255, $ending = "&hellip;", $cutChar= "¤")
+    {
+        if (strlen($string) > $maxlength) {
+            $string = trim($string, $cutChar);
+            $wrap = wordwrap($string, $maxlength, $cutChar);
+            $sub = substr($wrap, 0, strpos($wrap, $cutChar));
+            if (strlen($sub)) {
+                return $sub.$ending;
+            }
+        }
+        return $string;
+    }
+
+    /**
      * @param int $index
      * @return string|null
      */
