@@ -16,9 +16,8 @@ class Util extends \utilphp\util
 
     const BOOL_CAST_IGNORED_CHARS = [" ", "\t", "\r", "\n", "\0", "\x0B"];
     const BOOL_CAST_CONSIDERED_AS_FALSE = [
-        "",
+        ""          , "0",
         "false"     , "null",
-        "0"         , "-1",
         "''"        , '""',
         "no"        , "none",
         "disabled"  , "void",
@@ -33,11 +32,20 @@ class Util extends \utilphp\util
 
     /**
      * Better boolean conversion based on special common keywords
-     * @param mixed $val
+     * @param $val
+     * @param array|null  $consideredAsFalse
+     * @param string|null $ignoredChars
      * @return bool
      */
-    public static function bool($val) : bool
+    public static function bool($val, $consideredAsFalse  = null, $ignoredChars = null) : bool
     {
+        if (null === $consideredAsFalse) {
+            $consideredAsFalse = self::BOOL_CAST_CONSIDERED_AS_FALSE;
+        }
+        if (null === $ignoredChars) {
+            $consideredAsFalse = self::BOOL_CAST_IGNORED_CHARS;
+        }
+
         if (empty($val)) {
             return false;
         }
@@ -49,9 +57,9 @@ class Util extends \utilphp\util
         }
 
         $sVal = (string)$val;
-        $sVal = str_replace(static::BOOL_CAST_IGNORED_CHARS, "", $sVal);
+        $sVal = str_replace($ignoredChars, "", $sVal);
         $sVal = strtolower($sVal);
-        if (in_array($sVal, static::BOOL_CAST_CONSIDERED_AS_FALSE)) {
+        if (in_array($sVal, $consideredAsFalse)) {
             return false;
         }
         return (bool)$val;
@@ -60,7 +68,7 @@ class Util extends \utilphp\util
 
     /**
      * Better integer conversion
-     * @param mixed $val
+     * @param $val
      * @return int
      */
     public static function int($val) : int
@@ -70,20 +78,20 @@ class Util extends \utilphp\util
 
     /**
      * Better float conversion
-     * @param mixed $val
+     * @param $val
      * @return float
      */
     public static function float($val) : float
     {
-        if (!is_numeric($val)) { // is_numeric accept . but no , as numeric value
+        if (!is_numeric($val)) { // is_numeric accept . but no , as decimal symbol
 
             $stripped = preg_replace([
-                "/\,/",
-                "/[^0-9\.]/",
-            ], [
-                ".",
-                "",
-            ], (string)$val
+                    "/\,/",
+                    "/[^0-9\.]/",
+                ], [
+                    ".",
+                    "",
+                ], (string)$val
             );
             if (!$stripped) {
                 $stripped = 0;
@@ -95,6 +103,19 @@ class Util extends \utilphp\util
         }
         return (float)$val;
     }
+
+    /**
+     * @param $val
+     * @return string
+     */
+    public static function string($val) : string
+    {
+        return (string)$val;
+    }
+
+
+    // -----------------------  Type Detection -----------------------
+
 
     public static function get_type_meta($var) : string
     {
@@ -111,7 +132,7 @@ class Util extends \utilphp\util
 
     /**
      * Get string length or elements count
-     * @param mixed $var
+     * @param $var
      * @return int|null
      */
     public static function get_size($var)
@@ -125,141 +146,11 @@ class Util extends \utilphp\util
     }
 
 
-    // -----------------------  Arrays -----------------------
+    // ----------------------- Strings -----------------------
 
 
     /**
-     * @param array $array
-     * @return bool
-     */
-    public function is_sequential(array $array) : bool
-    {
-        return array_keys($array) === range(0, count($array) - 1);
-    }
-
-    /**
-     * Polyfill for native function introduced in PHP 7.1
-     * @see \is_iterable()
-     * @param $var
-     * @return bool
-     */
-    public static function is_iterable($var) : bool
-    {
-        return is_array($var)
-            || $var instanceof \Traversable
-        ;
-    }
-
-    /**
-     * Polyfill for native function introduced in PHP 7.3
-     * @see \is_countable()
-     * @see https://www.php.net/manual/en/function.is-countable.php
-     * @see https://wiki.php.net/rfc/is-countable
-     * @param mixed $var
-     * @return bool
-     */
-    public static function is_countable($var)
-    {
-        return is_array($var)
-            || $var instanceof \Countable
-            || $var instanceof \ResourceBundle
-            || $var instanceof \SimpleXmlElement
-        ;
-    }
-
-    public function is_as_array($var) : bool
-    {
-        return static::is_iterable($var) && static::is_countable($var);
-    }
-
-    public function is_as_array_object($var) : bool
-    {
-        return static::is_as_array($var) && is_object($var);
-    }
-
-    /**
-     * Polyfill for PHP 7.3
-     * @see \array_key_first()
-     * @param array $array
-     *
-     * @return int|string
-     */
-    public static function array_key_first(array $array)
-    {
-        return static::array_first_key($array);
-    }
-
-    /**
-     * Polyfill for PHP 7.3
-     * @see \array_key_last()
-     * @param array $array
-     * @return int|string
-     */
-    public static function array_key_last(array $array)
-    {
-        return static::array_last_key($array);
-    }
-
-    public static function array_key_random(array $array)
-    {
-        return array_rand($array, 1);
-    }
-
-    public static function array_value_random(array $array)
-    {
-        $key = array_rand($array, 1);
-        return $array[$key];
-    }
-
-    public static function iterable_key_first(\iterable $iterable)
-    {
-        foreach ($iterable as $key => $value) {
-            return $key;
-        }
-        return null;
-    }
-
-    public static function iterable_first(\iterable $items)
-    {
-        foreach ($items as $key => $value) {
-            return $value;
-        }
-        return null;
-    }
-
-    public static function iterable_key_last(\iterable $items)
-    {
-        $lastKey = null;
-        foreach ($items as $key => $value) {
-            $lastKey = $key;
-        }
-        return $lastKey;
-    }
-
-
-    public static function iterable_last(\iterable $items)
-    {
-        $lastValue = null;
-        foreach ($items as $key => $value) {
-            $lastValue = $value;
-        }
-        return $lastValue;
-    }
-
-    public static function array_column_recursive(array $array, ... $indexes)
-    {
-        foreach ($indexes as $index) {
-            try {
-                $array = array_column($array, $index);
-            } catch (\Exception $exception) {
-                break;
-            }
-        }
-        return $array;
-    }
-
-    /**
-     * @param        $str
+     * @param $str
      * @param string $extraCharlist
      * @return string
      */
@@ -269,12 +160,50 @@ class Util extends \utilphp\util
         return trim($str, $charlist);
     }
 
+    /**
+     * @param string $string
+     * @param int    $maxlength
+     * @param string $ending
+     * @param string $cutChar only 1 char here. can be \n to cut at first line.
+     * @return string
+     */
+    public function cut_at_word($string, $maxlength = 255, $ending = "&hellip;", $cutChar= "¤")
+    {
+        if (strlen($string) > $maxlength) {
+            $string = trim($string, $cutChar);
+            $wrap = wordwrap($string, $maxlength, $cutChar);
+            $sub = substr($wrap, 0, strpos($wrap, $cutChar));
+            if (strlen($sub)) {
+                return $sub.$ending;
+            }
+        }
+        return $string;
+    }
+
+    /**
+     * @param string $url
+     * @param array  $params
+     * @return string
+     */
+    public function build_url(string $url, $params = [])
+    {
+        if (!empty($params)) {
+            $queryString = http_build_query($params);
+            if (strpos($url, "?") === false()) {
+                $separator = "?";
+            } else {
+                $separator = "&";
+            }
+            return $url.$separator.$queryString;
+        }
+    }
+
 
     //  ----------------------- Numbers and Decimals -----------------------
 
 
     /**
-     * @param mixed $val
+     * @param $val
      * @return bool
      */
     public static function is_negative($val) : bool
@@ -330,43 +259,40 @@ class Util extends \utilphp\util
         return false;
     }
 
-    /**
-     * @param int|float|string $val
-     * @param int              $precision
-     * @param string           $decimalSymbol
-     *
-     * @return string
-     */
-    public static function format_decimal($val, int $precision = 2, string $decimalSymbol = ".")
-    {
-        $strVal = (string)round(static::float($val), $precision);
-        if (static::is_whole_number($strVal)) {
-            return $strVal.$decimalSymbol."00";
-        }
-        $strVal = str_replace(".", $decimalSymbol, $strVal);
-        $parts = explode($decimalSymbol, (string)$strVal);
-        $lastPart = end($parts);
-        if (strlen($lastPart) < $precision) {
-            $strVal.= str_repeat("0", $precision - strlen($lastPart));
-        }
-        return $strVal;
-    }
-
 
     //  ----------------------- Prices -----------------------
 
 
     /**
-     * @param float|int|string $price should contains "." for decimal
-     * @param array $options
+     * @see format_price()
+     * @param $price
+     *
+     * @return bool
+     */
+    public function is_price($price) : bool
+    {
+        try {
+             static::format_price($price, ["silent_errors" => false]);
+        } catch (\Exception $e) {
+            return false;
+        }
+        return true;
+
+    }
+
+    /**
+     * @see is_price()
+     * @param string|int|float $price valid price expected, should contains "." for decimal
+     * @param array $options to edit default format rules
      *
      * @return string
      * @throws \Exception
+     *
      */
     public function format_price($price, array $options = [])
     {
         try {
-            $currency = $options["currency"] ?? null; // will be process with sprintf if contains %s (as price amount). ie: "%s €"
+            $currency = $options["currency"] ?? null; // will be process with sprintf if contains %s (as price amount). ie: "$ %s", else will suffix it.
             $precision = $options["precision"] ?? 2; // decimal precision
             $decimalSmart = $options["decimal_smart"] ?? false; // will remove decimal part when .00
             $decimalSeparator = $options["decimal_separator"] ?? ","; // accepted : "." or ","
@@ -378,27 +304,25 @@ class Util extends \utilphp\util
 
             $formattedPrice = static::float_price($price, ["decimal_separator" => "."]);
 
-            if (is_numeric($formattedPrice)) {
-                if ($hideSign) {
-                    $formattedPrice = abs($formattedPrice);
+            if ($hideSign) {
+                $formattedPrice = abs($formattedPrice);
+            }
+            if ($decimalSmart && (float)floor($formattedPrice) === (float)$formattedPrice) {
+                $precision = 0;
+            }
+            $formattedPrice = number_format($formattedPrice, $precision, $decimalSeparator, $thousandsSeparator);
+            if (!empty($currency)) {
+                if (strpos($currency, "%s") !== false) {
+                    $formattedPrice = sprintf($currency, $formattedPrice);
+                } else {
+                    $formattedPrice = $formattedPrice.$currency;
                 }
-                if ($decimalSmart && (float)floor($formattedPrice) === (float)$formattedPrice) {
-                    $precision = 0;
-                }
-                $formattedPrice = number_format($formattedPrice, $precision, $decimalSeparator, $thousandsSeparator);
-                if (!empty($currency)) {
-                    if (strpos($currency, "%s") !== false) {
-                        $formattedPrice = sprintf($currency, $formattedPrice);
-                    } else {
-                        $formattedPrice = $formattedPrice.$currency;
-                    }
-                }
-                if ($forceHtmlChars) {
-                    $formattedPrice = htmlspecialchars($formattedPrice);
-                }
-                if ($forceHtmlNonBreakableSpaces) { // to process after htmlspecialchars !
-                    $formattedPrice = str_replace(" ", "&nbsp;", $formattedPrice);
-                }
+            }
+            if ($forceHtmlChars) {
+                $formattedPrice = htmlspecialchars($formattedPrice);
+            }
+            if ($forceHtmlNonBreakableSpaces) { // to process after htmlspecialchars !
+                $formattedPrice = str_replace(" ", "&nbsp;", $formattedPrice);
             }
             return $formattedPrice;
         } catch (\Throwable $e) {
@@ -410,6 +334,8 @@ class Util extends \utilphp\util
     }
 
     /**
+     * Convert a price label into in float value
+     * @see format_price()
      * @param float|int|string $price
      * @param array $options
      *
@@ -430,7 +356,7 @@ class Util extends \utilphp\util
         $amount = trim($amount);
         $floatAmount = (float)$amount;
         if (is_numeric($amount) || $floatAmount !== .0) {
-            return  $floatAmount;
+            return $floatAmount;
         }
         throw new \Exception("Error converting price '$price' to float ('$amount' : $floatAmount)", 40);
     }
@@ -463,31 +389,6 @@ class Util extends \utilphp\util
             $options["currency"] = "$%s";
         }
         return static::format_price($val, $options);
-    }
-
-
-    //  Bytes :
-
-    /**
-     * @param int $size
-     * @return string
-     */
-    public static function human_readable_octets($size)
-    {
-        $unit = ["o","Ko","Mo","Go","To"];
-        $size = (int)$size;
-        return round($size/pow(1024,($i=floor(log($size,1024)))),2).$unit[$i];
-    }
-
-    /**
-     * @param int $size
-     * @return string
-     */
-    public static function human_readable_bytes($size)
-    {
-        $unit = ["B","KB","MB","GB","TB"];
-        $size = (int)$size;
-        return round($size/pow(1024,($i=floor(log($size,1024)))),2).$unit[$i];
     }
 
 
@@ -537,57 +438,260 @@ class Util extends \utilphp\util
     }
 
 
-    // ----------------------- Strings -----------------------
+    // ----------------------- Bytes -----------------------
 
 
     /**
-     * @param string $string
-     * @param int    $maxlength
-     * @param string $ending
-     * @param string $cutChar only 1 char here. can be \n to cut at first line.
+     * @param int $size
      * @return string
      */
-    public function cut_at_word($string, $maxlength = 255, $ending = "&hellip;", $cutChar= "¤")
+    public static function human_readable_octets($size)
     {
-        if (strlen($string) > $maxlength) {
-            $string = trim($string, $cutChar);
-            $wrap = wordwrap($string, $maxlength, $cutChar);
-            $sub = substr($wrap, 0, strpos($wrap, $cutChar));
-            if (strlen($sub)) {
-                return $sub.$ending;
-            }
-        }
-        return $string;
+        $unit = ["o","Ko","Mo","Go","To"];
+        $size = (int)$size;
+        return round($size/pow(1024,($i=floor(log($size,1024)))),2).$unit[$i];
+    }
+
+    /**
+     * @param int $size
+     * @return string
+     */
+    public static function human_readable_bytes($size)
+    {
+        $unit = ["B","KB","MB","GB","TB"];
+        $size = (int)$size;
+        return round($size/pow(1024,($i=floor(log($size,1024)))),2).$unit[$i];
+    }
+
+
+    // -----------------------  Array/iterable Detection -----------------------
+
+
+    /**
+     * Polyfill for native function introduced in PHP 7.1
+     * @see \is_iterable()
+     * @param $var
+     * @return bool
+     */
+    public static function is_iterable($var) : bool
+    {
+        return is_array($var)
+            || $var instanceof \Traversable
+        ;
+    }
+
+    /**
+     * Polyfill for native function introduced in PHP 7.3
+     * @see \is_countable()
+     * @see https://www.php.net/manual/en/function.is-countable.php
+     * @see https://wiki.php.net/rfc/is-countable
+     * @param $var
+     * @return bool
+     */
+    public static function is_countable($var)
+    {
+        return is_array($var)
+            || $var instanceof \Countable
+            || $var instanceof \ResourceBundle
+            || $var instanceof \SimpleXmlElement
+        ;
+    }
+
+    public function is_like_array($var) : bool
+    {
+        return static::is_iterable($var) && static::is_countable($var);
+    }
+
+    public function is_like_array_but_object($var) : bool
+    {
+        return static::is_like_array($var) && is_object($var);
+    }
+
+    /**
+     * Test on a copy to not change the original array pointers
+     * @param array $array
+     * @return bool
+     */
+    public function is_sequential(array $array) : bool
+    {
+        $clone = $array;
+        return array_keys($clone) === range(0, count($clone) - 1);
+    }
+
+
+    // -----------------------  Arrays -----------------------
+
+
+    /**
+     * Test on a copy to not change the original array pointers
+     * @see \array_key_first()
+     * @param array $array
+     *
+     * @return int|string
+     */
+    public static function array_first_key(array $array)
+    {
+        $clone = $array;
+        return parent::array_first_key($clone);
+    }
+
+    /**
+     * Test on a copy to not change the original array pointers
+     * @param array $array
+     *
+     * @return int|string
+     */
+    public static function array_first_value(array $array)
+    {
+        $clone = $array;
+        return reset($clone);
+    }
+
+    /**
+     * Test on a copy to not change the original array pointers
+     * @see \array_key_last()
+     * @param array $array
+     * @return int|string
+     */
+    public static function array_last_key(array $array)
+    {
+        $clone = $array;
+        return parent::array_last_key($clone);
     }
 
 
     /**
-     * @param string $url
-     * @param array  $params
-     * @return string
+     * Test on a copy to not change the original array pointers
+     * @param array $array
+     *
+     * @return mixed
      */
-    public function build_url(string $url, $params = [])
+    public static function array_last_value(array $array)
     {
-        if (!empty($params)) {
-            $queryString = http_build_query($params);
-            if (strpos($url, "?") === false()) {
-                $separator = "?";
-            } else {
-                $separator = "&";
+        $clone = $array;
+        return end($clone);
+    }
+
+    /**
+     * Test on a copy to not change the original array pointers
+     * @param array $array
+     *
+     * @return mixed
+     */
+    public static function array_random_key(array $array)
+    {
+        $clone = $array;
+        return array_rand($clone, 1);
+    }
+
+    /**
+     * @param array $array
+     *
+     * @return mixed
+     */
+    public static function array_random_value(array $array)
+    {
+        $clone = $array;
+        $key = array_rand($clone, 1);
+        return $clone[$key];
+    }
+
+    /**
+     * Test on a copy to not change the original object internal pointer
+     * @param array $array
+     * @param mixed ...$indexes
+     *
+     * @return array
+     */
+    public static function array_column_recursive(array $array, ... $indexes)
+    {
+        $clone = $array;
+        foreach ($indexes as $index) {
+            try {
+                $array = array_column($array, $index);
+            } catch (\Exception $exception) {
+                break;
             }
-            return $url.$separator.$queryString;
         }
+        return $array;
     }
 
 
-    // ----------------------- Development -----------------------
+    // -----------------------  Traversable Objects -----------------------
+
+
+    /**
+     * @param \Traversable $collection
+     *
+     * @return int|string|null
+     */
+    public static function collection_first_key(\Traversable $collection )
+    {
+        $clone = clone $collection ;
+        foreach ($clone as $key => $value) {
+            return $key;
+        }
+        return null;
+    }
+
+    /**
+     * Test on a copy to not change the original object internal pointer
+     * @param \Traversable $collection
+     *
+     * @return mixed|null
+     *
+     */
+    public static function collection_first_value(\Traversable $collection )
+    {
+        $clone = clone $collection ;
+        foreach ($clone as $value) {
+            return $value;
+        }
+        return null;
+    }
+
+    /**
+     * Test on a copy to not change the original object internal pointer
+     * @param \Traversable $collection
+     *
+     * @return int|string|null
+     */
+    public static function collection_last_key(\Traversable $collection )
+    {
+        $clone = clone $collection ;
+        $lastKey = null;
+        foreach ($clone as $key => $value) {
+            $lastKey = $key;
+        }
+        return $lastKey;
+    }
+
+
+    /**
+     * Test on a copy to not change the original object internal pointer
+     * @param \Traversable $collection
+     *
+     * @return mixed|null
+     */
+    public static function collection_last_value(\Traversable $collection )
+    {
+        $clone = clone $collection ;
+        $lastValue = null;
+        foreach ($clone as $value) {
+            $lastValue = $value;
+        }
+        return $lastValue;
+    }
+
+
+    // ----------------------- Development & debug -----------------------
 
 
     /**
      * @param int $index
-     * @return string|null
+     * @return string
      */
-    public static function formatted_backtrace(int $index = 1)
+    public static function format_backtrace(int $index = 1)
     {
         $dbt = debug_backtrace();
         if (isset($dbt[$index])) {
@@ -599,10 +703,7 @@ class Util extends \utilphp\util
             , $backtrace["file"]  ?? "-"
             , $backtrace["line"] ?? "-"
         );
-
-        return null;
     }
-
 
     /**
      * @param mixed ...$vars
@@ -637,9 +738,8 @@ class Util extends \utilphp\util
     public static function die_dump(...$vars)
     {
         static::dump(...$vars);
-        die(PHP_EOL."/die_dump in ".static::formatted_backtrace().PHP_EOL);
+        die(PHP_EOL."/die_dump in ".static::format_backtrace().PHP_EOL);
     }
-
 
     /**
      * dump and stop script
@@ -648,7 +748,7 @@ class Util extends \utilphp\util
     public static function die_dump_plain(...$vars)
     {
         static::dump_plain(...$vars);
-        die(PHP_EOL."/die_dump_plain in ".static::formatted_backtrace().PHP_EOL);
+        die(PHP_EOL."/die_dump_plain in ".static::format_backtrace().PHP_EOL);
     }
 
 } // end class

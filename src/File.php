@@ -3,7 +3,7 @@
 namespace TB\Toolbox;
 
 /**
- * @author    Thomas Bondois
+ * @author Thomas Bondois
  */
 class File
 {
