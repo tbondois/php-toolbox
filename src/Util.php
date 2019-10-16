@@ -65,7 +65,6 @@ class Util extends \utilphp\util
         return (bool)$val;
     }
 
-
     /**
      * Better integer conversion
      * @param $val
@@ -334,7 +333,7 @@ class Util extends \utilphp\util
     }
 
     /**
-     * Convert a price label into in float value
+     * Intemps Convert a price label into in float value, with the most popular currencies
      * @see format_price()
      * @param float|int|string $price
      * @param array $options
@@ -344,16 +343,16 @@ class Util extends \utilphp\util
      */
     public function float_price($price, array $options = []) : float
     {
-        $decimalSeparator = $options["decimal_separator"] ?? "."; // indication about entry param
         $thousandsSeparator = $options["thousand_separator"] ?? "";// indication about entry param
+        $decimalSeparator = $options["decimal_separator"] ?? ","; // indication about entry param
 
         $amount = strip_tags($price);
 
         $amount = htmlspecialchars_decode($amount);
         $amount = str_replace($thousandsSeparator,"¤¤", $amount);
         $amount = str_replace($decimalSeparator,".", $amount);
-        $amount = str_replace([" ","¤¤","€","$","£","¥","nbsp;"], "", $amount);
-        $amount = trim($amount);
+        $amount = str_replace([" ","¤¤","€","&euro;","$","£","¥","nbsp;","#"], "", $amount);
+        $amount = static::trim($amount);
         $floatAmount = (float)$amount;
         if (is_numeric($amount) || $floatAmount !== .0) {
             return $floatAmount;
