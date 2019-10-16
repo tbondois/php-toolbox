@@ -361,39 +361,52 @@ class Util extends \utilphp\util
      * @param array $options
      *
      * @return string
+     * @throws \Exception
      */
     public function format_price($price, array $options = [])
     {
-        $currency = $options["currency"] ?? null;
-        $precision = $options["precision"] ?? 2;
-        $decimalSmart = $options["decimal_smart"] ?? false;
-        $decimalSeparator = $options["decimal_separator"] ?? ","; // accepted : "." or ","
-        $thousandsSeparator = $options["thousands_separator"]  ?? "";
-        $forceHtmlNonBreakableSpaces = $options["nbsp"] ?? false;
-        $forceHtmlChars = $options["html_chars"] ?? false;
+        try {
+            $currency = $options["currency"] ?? null; // will be process with sprintf if contains %s (as price amount). ie: "%s €"
+            $precision = $options["precision"] ?? 2; // decimal precision
+            $decimalSmart = $options["decimal_smart"] ?? false; // will remove decimal part when .00
+            $decimalSeparator = $options["decimal_separator"] ?? ","; // accepted : "." or ","
+            $thousandsSeparator = $options["thousands_separator"]  ?? ""; // can be spaces, comma etc
+            $forceHtmlNonBreakableSpaces = $options["nbsp"] ?? false; // will transform space into nbsp;
+            $forceHtmlChars = $options["html_chars"] ?? false; // will convert special chars into html &; equivalent
+            $hideSign = $options["hide_sign"] ?? false; // will not show the - when negative
+            $silentErrors = $options["silent_errors"] ?? false;
 
-        $formattedPrice = static::float_price($price, ["decimal_separator" => "."]);
+            $formattedPrice = static::float_price($price, ["decimal_separator" => "."]);
 
-        if (is_numeric($formattedPrice)) {
-            if ($decimalSmart && (float)floor($formattedPrice) === (float)$formattedPrice) {
-                $precision = 0;
-            }
-            $formattedPrice = number_format($formattedPrice, $precision, $decimalSeparator, $thousandsSeparator);
-            if (!empty($currency)) {
-                if (strpos($currency, "%") !== false) {
-                    $formattedPrice = sprintf($currency, $formattedPrice);
-                } else {
-                    $formattedPrice = sprintf("%s%s", $formattedPrice, $currency);
+            if (is_numeric($formattedPrice)) {
+                if ($hideSign) {
+                    $formattedPrice = abs($formattedPrice);
+                }
+                if ($decimalSmart && (float)floor($formattedPrice) === (float)$formattedPrice) {
+                    $precision = 0;
+                }
+                $formattedPrice = number_format($formattedPrice, $precision, $decimalSeparator, $thousandsSeparator);
+                if (!empty($currency)) {
+                    if (strpos($currency, "%s") !== false) {
+                        $formattedPrice = sprintf($currency, $formattedPrice);
+                    } else {
+                        $formattedPrice = $formattedPrice.$currency;
+                    }
+                }
+                if ($forceHtmlChars) {
+                    $formattedPrice = htmlspecialchars($formattedPrice);
+                }
+                if ($forceHtmlNonBreakableSpaces) { // to process after htmlspecialchars !
+                    $formattedPrice = str_replace(" ", "&nbsp;", $formattedPrice);
                 }
             }
-            if ($forceHtmlChars) {
-                $formattedPrice = htmlspecialchars($formattedPrice);
-            }
-            if ($forceHtmlNonBreakableSpaces) {
-                $formattedPrice = str_replace(" ", "&nbsp;", $formattedPrice);
+            return $formattedPrice;
+        } catch (\Throwable $e) {
+            if ($silentErrors) {
+                throw new \Exception("Error formatting price '$price'", 41, $e);
             }
         }
-        return $formattedPrice;
+        return $price;
     }
 
     /**
@@ -401,34 +414,38 @@ class Util extends \utilphp\util
      * @param array $options
      *
      * @return float
+     * @throws \Exception
      */
     public function float_price($price, array $options = []) : float
     {
-        $decimalSeparator = $options["decimal_separator"] ?? ","; // indication about entry param
-        $thousandsSeparator = $options["thousand_separator"] ?? " ";// indication about entry param
+        $decimalSeparator = $options["decimal_separator"] ?? "."; // indication about entry param
+        $thousandsSeparator = $options["thousand_separator"] ?? "";// indication about entry param
 
         $amount = strip_tags($price);
 
         $amount = htmlspecialchars_decode($amount);
-        $amount = str_replace($decimalSeparator,".", trim($amount));
-        $amount = str_replace($thousandsSeparator,"", trim($amount));
-        $amount = str_replace([" ","€","$","£","¥","nbsp;"], "", $amount);
-        $amount = (float)trim($amount);
-        return $amount;
+        $amount = str_replace($thousandsSeparator,"¤¤", $amount);
+        $amount = str_replace($decimalSeparator,".", $amount);
+        $amount = str_replace([" ","¤¤","€","$","£","¥","nbsp;"], "", $amount);
+        $amount = trim($amount);
+        $floatAmount = (float)$amount;
+        if (is_numeric($amount) || $floatAmount !== .0) {
+            return  $floatAmount;
+        }
+        throw new \Exception("Error converting price '$price' to float ('$amount' : $floatAmount)", 40);
     }
 
     /**
      * @param int|float|string $val
      * @param array $options
+     *
      * @return string
+     * @throws \Exception
      */
     public static function price_eur($val, array $options = [])
     {
         if (!isset($options["currency"])) {
             $options["currency"] = "%s€";
-        }
-        if (!isset($options["decimal_separator"])) {
-            $options["decimal_separator"] = ",";
         }
         return static::format_price($val, $options);
     }
@@ -436,15 +453,14 @@ class Util extends \utilphp\util
     /**
      * @param int|float|string $val
      * @param array $options
+     *
      * @return string
+     * @throws \Exception
      */
     public static function price_usd($val, array $options = [])
     {
         if (!isset($options["currency"])) {
             $options["currency"] = "$%s";
-        }
-        if (!isset($options["decimal_separator"])) {
-            $options["decimal_separator"] = ",";
         }
         return static::format_price($val, $options);
     }
