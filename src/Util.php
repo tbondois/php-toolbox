@@ -27,6 +27,10 @@ class Util extends \utilphp\util
         "__return_false",
     ];
 
+
+    // ----------------------- Types Converts -----------------------
+
+
     /**
      * Better boolean conversion based on special common keywords
      * @param mixed $val
@@ -120,36 +124,9 @@ class Util extends \utilphp\util
         return null;
     }
 
-    /**
-     * @param mixed $val
-     * @return bool
-     */
-    public static function is_negative($val) : bool
-    {
-        return static::starts_with((string)$val, "-");
-    }
 
-    /**
-     * Check if parameter is contain a whole number (no decimal or alphabet, except a minus at first position for negative ones)
-     *
-     * @param $var
-     *
-     * @return bool
-     */
-    public static function is_whole_number($var) {
-        if (is_int($var)) {
-            return true;
-        } elseif (is_float($var)) {
-            return (int)$var == (float)$var;
-        } elseif (is_string($var) && is_numeric($var)) {
-            if (static::is_negative($var)) {
-                $var = substr($var, 1);
-            }
-            return ctype_digit($var);
-        } else {
-            return false;
-        }
-    }
+    // -----------------------  Arrays -----------------------
+
 
     /**
      * @param array $array
@@ -292,6 +269,41 @@ class Util extends \utilphp\util
         return trim($str, $charlist);
     }
 
+
+    //  ----------------------- Numbers and Decimals -----------------------
+
+
+    /**
+     * @param mixed $val
+     * @return bool
+     */
+    public static function is_negative($val) : bool
+    {
+        return static::starts_with((string)$val, "-");
+    }
+
+    /**
+     * Check if parameter is contain a whole number (no decimal or alphabet, except a minus at first position for negative ones)
+     *
+     * @param $var
+     *
+     * @return bool
+     */
+    public static function is_whole_number($var) {
+        if (is_int($var)) {
+            return true;
+        } elseif (is_float($var)) {
+            return (int)$var == (float)$var;
+        } elseif (is_string($var) && is_numeric($var)) {
+            if (static::is_negative($var)) {
+                $var = substr($var, 1);
+            }
+            return ctype_digit($var);
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Check if parameter is contain a whole number greather >= 0
      * @param $val
@@ -340,25 +352,105 @@ class Util extends \utilphp\util
         return $strVal;
     }
 
+
+    //  ----------------------- Prices -----------------------
+
+
     /**
-     * @param int|float|string $val
-     * @param string $decimalSymbol
+     * @param float|int|string $price should contains "." for decimal
+     * @param array $options
+     *
      * @return string
      */
-    public static function price_eur($val, string $decimalSymbol = ",")
+    public function format_price($price, array $options = [])
     {
-       return static::format_decimal($val, 2, $decimalSymbol)."€";
+        $currency = $options["currency"] ?? null;
+        $precision = $options["precision"] ?? 2;
+        $decimalSmart = $options["decimal_smart"] ?? false;
+        $decimalSeparator = $options["decimal_separator"] ?? ","; // accepted : "." or ","
+        $thousandsSeparator = $options["thousands_separator"]  ?? "";
+        $forceHtmlNonBreakableSpaces = $options["nbsp"] ?? false;
+        $forceHtmlChars = $options["html_chars"] ?? false;
+
+        $formattedPrice = static::float_price($price, ["decimal_separator" => "."]);
+
+        if (is_numeric($formattedPrice)) {
+            if ($decimalSmart && (float)floor($formattedPrice) === (float)$formattedPrice) {
+                $precision = 0;
+            }
+            $formattedPrice = number_format($formattedPrice, $precision, $decimalSeparator, $thousandsSeparator);
+            if (!empty($currency)) {
+                if (strpos($currency, "%") !== false) {
+                    $formattedPrice = sprintf($currency, $formattedPrice);
+                } else {
+                    $formattedPrice = sprintf("%s%s", $formattedPrice, $currency);
+                }
+            }
+            if ($forceHtmlChars) {
+                $formattedPrice = htmlspecialchars($formattedPrice);
+            }
+            if ($forceHtmlNonBreakableSpaces) {
+                $formattedPrice = str_replace(" ", "&nbsp;", $formattedPrice);
+            }
+        }
+        return $formattedPrice;
+    }
+
+    /**
+     * @param float|int|string $price
+     * @param array $options
+     *
+     * @return float
+     */
+    public function float_price($price, array $options = []) : float
+    {
+        $decimalSeparator = $options["decimal_separator"] ?? ","; // indication about entry param
+        $thousandsSeparator = $options["thousand_separator"] ?? " ";// indication about entry param
+
+        $amount = strip_tags($price);
+
+        $amount = htmlspecialchars_decode($amount);
+        $amount = str_replace($decimalSeparator,".", trim($amount));
+        $amount = str_replace($thousandsSeparator,"", trim($amount));
+        $amount = str_replace([" ","€","$","£","¥","nbsp;"], "", $amount);
+        $amount = (float)trim($amount);
+        return $amount;
     }
 
     /**
      * @param int|float|string $val
-     * @param string $decimalSymbol
+     * @param array $options
      * @return string
      */
-    public static function price_usd($val, string $decimalSymbol = ",")
+    public static function price_eur($val, array $options = [])
     {
-        return "$".static::format_decimal($val, 2, $decimalSymbol);
+        if (!isset($options["currency"])) {
+            $options["currency"] = "%s€";
+        }
+        if (!isset($options["decimal_separator"])) {
+            $options["decimal_separator"] = ",";
+        }
+        return static::format_price($val, $options);
     }
+
+    /**
+     * @param int|float|string $val
+     * @param array $options
+     * @return string
+     */
+    public static function price_usd($val, array $options = [])
+    {
+        if (!isset($options["currency"])) {
+            $options["currency"] = "$%s";
+        }
+        if (!isset($options["decimal_separator"])) {
+            $options["decimal_separator"] = ",";
+        }
+        return static::format_price($val, $options);
+    }
+
+
+    //  Bytes :
 
     /**
      * @param int $size
@@ -381,7 +473,11 @@ class Util extends \utilphp\util
         $size = (int)$size;
         return round($size/pow(1024,($i=floor(log($size,1024)))),2).$unit[$i];
     }
-    
+
+
+    // ----------------------- Dates -----------------------
+
+
     /**
      * @see https://www.php.net/manual/fr/datetime.construct.php
      * @see https://www.php.net/manual/en/datetime.formats.php
@@ -424,15 +520,18 @@ class Util extends \utilphp\util
         return static::date_format($time, $format, "UTC");
     }
 
+
+    // ----------------------- Strings -----------------------
+
+
     /**
-     * @param        $string
+     * @param string $string
      * @param int    $maxlength
      * @param string $ending
      * @param string $cutChar only 1 char here. can be \n to cut at first line.
-     *
      * @return string
      */
-    public function cutAtWord($string, $maxlength = 255, $ending = "&hellip;", $cutChar= "¤")
+    public function cut_at_word($string, $maxlength = 255, $ending = "&hellip;", $cutChar= "¤")
     {
         if (strlen($string) > $maxlength) {
             $string = trim($string, $cutChar);
@@ -444,6 +543,29 @@ class Util extends \utilphp\util
         }
         return $string;
     }
+
+
+    /**
+     * @param string $url
+     * @param array  $params
+     * @return string
+     */
+    public function build_url(string $url, $params = [])
+    {
+        if (!empty($params)) {
+            $queryString = http_build_query($params);
+            if (strpos($url, "?") === false()) {
+                $separator = "?";
+            } else {
+                $separator = "&";
+            }
+            return $url.$separator.$queryString;
+        }
+    }
+
+
+    // ----------------------- Development -----------------------
+
 
     /**
      * @param int $index
